@@ -1,0 +1,1 @@
+I cheated, these were done by hand.

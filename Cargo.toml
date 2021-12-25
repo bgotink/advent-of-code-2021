@@ -1,0 +1,192 @@
+[package]
+name = "advent-of-code-2021"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[[bin]]
+name = "01-01"
+path = "01/01/program.rs"
+
+[[bin]]
+name = "01-02"
+path = "01/02/program.rs"
+
+[[bin]]
+name = "02-01"
+path = "02/01/program.rs"
+
+[[bin]]
+name = "02-02"
+path = "02/02/program.rs"
+
+[[bin]]
+name = "03-01"
+path = "03/01/program.rs"
+
+[[bin]]
+name = "03-02"
+path = "03/02/program.rs"
+
+[[bin]]
+name = "04-01"
+path = "04/01/program.rs"
+
+[[bin]]
+name = "04-02"
+path = "04/02/program.rs"
+
+[[bin]]
+name = "05-01"
+path = "05/01/program.rs"
+
+[[bin]]
+name = "05-02"
+path = "05/02/program.rs"
+
+[[bin]]
+name = "06-01"
+path = "06/01/program.rs"
+
+[[bin]]
+name = "06-02"
+path = "06/02/program.rs"
+
+[[bin]]
+name = "07-01"
+path = "07/01/program.rs"
+
+[[bin]]
+name = "07-02"
+path = "07/02/program.rs"
+
+[[bin]]
+name = "08-01"
+path = "08/01/program.rs"
+
+[[bin]]
+name = "08-02"
+path = "08/02/program.rs"
+
+[[bin]]
+name = "09-01"
+path = "09/01/program.rs"
+
+[[bin]]
+name = "09-02"
+path = "09/02/program.rs"
+
+[[bin]]
+name = "10-01"
+path = "10/01/program.rs"
+
+[[bin]]
+name = "10-02"
+path = "10/02/program.rs"
+
+[[bin]]
+name = "11-01"
+path = "11/01/program.rs"
+
+[[bin]]
+name = "11-02"
+path = "11/02/program.rs"
+
+[[bin]]
+name = "12-01"
+path = "12/01/program.rs"
+
+[[bin]]
+name = "12-02"
+path = "12/02/program.rs"
+
+[[bin]]
+name = "13-01"
+path = "13/01/program.rs"
+
+[[bin]]
+name = "13-02"
+path = "13/02/program.rs"
+
+[[bin]]
+name = "14-01"
+path = "14/01/program.rs"
+
+[[bin]]
+name = "14-02"
+path = "14/02/program.rs"
+
+[[bin]]
+name = "15-01"
+path = "15/01/program.rs"
+
+[[bin]]
+name = "15-02"
+path = "15/02/program.rs"
+
+[[bin]]
+name = "16-01"
+path = "16/01/program.rs"
+
+[[bin]]
+name = "16-02"
+path = "16/02/program.rs"
+
+[[bin]]
+name = "17-01"
+path = "17/01/program.rs"
+
+[[bin]]
+name = "17-02"
+path = "17/02/program.rs"
+
+[[bin]]
+name = "18-01"
+path = "18/01/program.rs"
+
+[[bin]]
+name = "18-02"
+path = "18/02/program.rs"
+
+[[bin]]
+name = "19-01"
+path = "19/01/program.rs"
+
+[[bin]]
+name = "19-02"
+path = "19/02/program.rs"
+
+[[bin]]
+name = "20-01"
+path = "20/01/program.rs"
+
+[[bin]]
+name = "20-02"
+path = "20/02/program.rs"
+
+[[bin]]
+name = "21-01"
+path = "21/01/program.rs"
+
+[[bin]]
+name = "21-02"
+path = "21/02/program.rs"
+
+[[bin]]
+name = "22-01"
+path = "22/01/program.rs"
+
+[[bin]]
+name = "22-02"
+path = "22/02/program.rs"
+
+[[bin]]
+name = "24"
+path = "24/program.rs"
+
+[[bin]]
+name = "25"
+path = "25/program.rs"

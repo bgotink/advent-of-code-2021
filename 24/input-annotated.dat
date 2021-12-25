@@ -1,0 +1,672 @@
+inp w # read character 1
+
+# The following instructions are useless, they operate on the registers X and Z which are unset so 0
+## mul x 0
+## add x z
+## mod x 26
+## div z 1
+# The following section sets X to 12, then equates that 12 to register W which is 1-9, so always false
+## add x 12
+## eql x w
+# X is always 0 because of the previous eql instruction, so the follwing is always true, setting X to 1
+## eql x 0
+## Ergo we replace it with this:
+add x 1
+
+# Clearing Y which is already cleared
+## mul y 0
+# This add is useless as the value is reset to 0 in a lower insturction, before Y is used
+## add y 25
+# Multiplying Y by X, but X is one, so this is useless
+## mul y x
+# This add is useless as the value is reset to 0 in a lower insturction, before Y is used
+## add y 1
+
+# Z is empty and 0 times 26 is still 0
+## mul z y
+# Y starts as 0
+## mul y 0
+
+# Now we're talking, setting Y to the value W we just read
+add y w
+add y 6
+# X is 1, useless instruction is useless
+## mul y x
+# So we're left with W == character 1, X == 1, Y == Z == W + 6
+add z y
+
+inp w # read character 2
+
+# Useless instructions, as we set X to 1 later on before reading it
+## mul x 0
+## add x z
+# Z (so X) is 1-9 + 6, so X % 26 == X
+## mod x 26
+# W == character 2, X == Y == Z == character 1 + 6
+
+# Useless instruction is useless
+## div z 1
+
+# X + 11 cannot be W, as W is 1-9
+## add x 11
+## eql x w
+## eql x 0
+# so this block comes down to
+mul x 0
+add x 1
+
+# This entire block makes Y into 26, uses that to multiply Z with 26 and then resets Y to 0
+## mul y 0
+## add y 25
+# X == 1
+## mul y x
+## add y 1
+## mul z y
+## mul y 0
+# so boil it down into
+mul z 26
+mul y 0
+# At this point: W == character 2, X == 1, Y == 0, Z == 26 * (character 1 + 6)
+
+add y w
+add y 12
+# X == 1
+## mul y x
+add z y
+# At this point: W == character 2, X == 1, Y is not used before wiping, Z == 26 * (character 1 + 6) + character 2 + 12
+
+inp w # read character 3
+
+# Useless, as X is reset to 1 later on
+## mul x 0
+## add x z
+## mod x 26
+
+# Useless
+## div z 1
+
+# Again a goood way of setting X to 1, as X + 10 cannot be 1-9
+# Thankfully X is already 1, so...
+## add x 10
+## eql x w
+## eql x 0
+
+# This entire block makes Y into 26, uses that to multiply Z with 26 and then resets Y to 0
+## mul y 0
+## add y 25
+# Useless as X is still 1
+## mul y x
+## add y 1
+## mul z y
+## mul y 0
+# replace this block with
+mul z 26
+mul y 0
+
+add y w
+add y 5
+# Still useless with X being 1
+## mul y x
+add z y
+# At this point: W == character 3, X == 1, Y is not used before wiping, Z == 26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+
+inp w # read character 4
+
+mul x 0
+add x z
+mod x 26
+# X is now Z % 26, so (character 3 + 5)
+
+# Useless
+## div z 1
+
+add x 10
+eql x w
+eql x 0
+
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 10
+mul y x
+add z y
+# At this point: W == character 4, X == 1, Y is not used before wiping, Z == 26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 4 + 10
+
+inp w # read character 5
+
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -16
+# At this point: W == character 5, X == character 4 - 6, Z = 26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+
+eql x w
+eql x 0
+# At this point: X is one of
+#    if (character 4 - 6 == character 5) -> 0
+#    if (character 4 - 6 != character 5) -> 1
+# THIS IS GETTING EXCITING!
+
+mul y 0
+add y 25
+mul y x
+add y 1
+# At this point: Y is one of
+#    if (character 4 - 6 == character 5) -> 1
+#    if (character 4 - 6 != character 5) -> 26
+
+mul z y
+mul y 0
+add y w
+add y 7
+mul y x
+add z y
+# At this point: Z is one of
+#    if (character 4 - 6 == character 5) ->       26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#    if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+
+inp w # read character 6
+
+# This entire block is a convoluted way of setting X to 1
+## mul x 0
+## add x z
+## mod x 26
+# Useless
+## div z 1
+# X + 14 cannot be 1-9
+## add x 14
+## eql x w
+## eql x 0
+# So replace this block with
+mul x 0
+add x 1
+
+# This block multiplies Z by 26 and clears Y
+## mul y 0
+## add y 25
+# X == 1
+## mul y x
+## add y 1
+## mul z y
+## mul y 0
+# So replace it with
+mul z 26
+mul y 0
+
+add y w
+add y 0
+# Useless
+## mul y x
+add z y
+# At this point, W == character 6, X == 1, Y == 0, and Z is one of
+#    if (character 4 - 6 == character 5) -> 26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 6
+#    if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+
+inp w # read character 7
+
+# Inventing even more convoluted ways of setting X to 1 (which it already is)
+## mul x 0
+## add x z
+## mod x 26
+# Useless
+## div z 1
+# character 6 + 12 cannot be character 7
+## add x 12
+## eql x w
+## eql x 0
+
+# This block multiplies Z by 26 and clears Y
+## mul y 0
+## add y 25
+# X == 1
+## mul y x
+## add y 1
+## mul z y
+## mul y 0
+# So replace it with
+mul z 26
+mul y 0
+
+add y w
+add y 4
+# Useless
+## mul y x
+add z y
+# At this point, W == character 7, X == 1, Y == 0, and Z is one of
+#    if (character 4 - 6 == character 5) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 6) + character 7 + 4
+#    if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 7 + 4
+
+inp w # read character 8
+
+# More excitement!
+mul x 0
+add x z
+mod x 26
+div z 26
+# X == character 7 + 4
+# Z is back to one of
+#   if (character 4 - 6 == character 5) -> 26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 6
+#   if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+
+add x -4
+eql x w
+eql x 0
+# At this point, X is one of
+#   if (character 7 == character 8) -> 0
+#   if (character 7 != character 8) -> 1
+
+mul y 0
+add y 25
+mul y x
+add y 1
+# At this point, Y is one of
+#   if (character 7 == character 8) -> 1
+#   if (character 7 != character 8) -> 26
+
+mul z y
+mul y 0
+add y w
+add y 12
+mul y x
+add z y
+# At this point, W == character 8, X and Y aren't read again, and Z is one of
+#   if (character 7 == character 8) ->
+#     if (character 4 - 6 == character 5) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#     if (character 4 - 6 != character 5) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#   if (character 7 != character 8) ->
+#     if (character 4 - 6 == character 5) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#     if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+
+inp w # read character 9
+
+# character 9 cannot possibly equal 15 + a positive number, so...
+# this entire block is a convoluted way of setting X to 1
+## mul x 0
+## add x z
+## mod x 26
+## div z 1
+## add x 15
+## eql x w
+## eql x 0
+mul x 0
+add x 1
+
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+
+add y w
+add y 14
+mul y x
+add z y
+# At this point, W == character 8, X == 1, Y isn't used before resetting, and Z is one of
+#   if (character 7 == character 8) ->
+#     if (character 4 - 6 == character 5) -> 26 * (      26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6                    ) + character 9 + 14
+#     if (character 4 - 6 != character 5) -> 26 * (      26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6                    ) + character 9 + 14
+#   if (character 7 != character 8) ->
+#     if (character 4 - 6 == character 5) -> 26 * (26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12) + character 9 + 14
+#     if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12) + character 9 + 14
+
+inp w # read character 10
+
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -7
+eql x w
+eql x 0
+
+# More excitement!
+# At this point, X is one of
+#   if (character 9 + 7 == character 10) -> 0
+#   if (character 9 + 7 != character 10) -> 1
+# And Z is back to being one of
+#   if (character 7 == character 8) ->
+#     if (character 4 - 6 == character 5) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#     if (character 4 - 6 != character 5) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#   if (character 7 != character 8) ->
+#     if (character 4 - 6 == character 5) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#     if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+
+mul y 0
+add y 25
+mul y x
+add y 1
+# At this point, Y is one of
+#   if (character 9 + 7 == character 10) -> 1
+#   if (character 9 + 7 != character 10) -> 26
+
+mul z y
+mul y 0
+add y w
+add y 13
+mul y x
+add z y
+# At this point, Z is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->             26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->             26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->       26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#       if (character 4 - 6 != character 5) ->       26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+#   if (character 9 + 7 != character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) -> 26 * (      26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6                    ) + character 10 + 13
+#       if (character 4 - 6 != character 5) -> 26 * (      26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6                    ) + character 10 + 13
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) -> 26 * (26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12) + character 10 + 13
+#       if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12) + character 10 + 13
+
+inp w # read character 11
+
+mul x 0
+add x z
+mod x 26
+div z 26
+# At this point, X is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) -> character 6
+#     if (character 7 != character 8) -> character 8 + 12
+#   if (character 9 + 7 != character 10) -> character 10 + 13
+# And Z is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->                   26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#       if (character 4 - 6 != character 5) ->             26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#   if (character 9 + 7 != character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#       if (character 4 - 6 != character 5) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+
+add x -8
+eql x w
+eql x 0
+# At this point, X is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 6 - 8 == character 11) -> 0
+#       if (character 6 - 8 != character 11) -> 1
+#     if (character 7 != character 8) ->
+#       if (character 8 + 4 == character 11) -> 0
+#       if (character 8 + 4 != character 11) -> 1
+#   if (character 9 + 7 != character 10) ->
+#     if (character 10 + 5 == character 11) -> 0
+#     if (character 10 + 5 != character 11) -> 1
+
+mul y 0
+add y 25
+mul y x
+add y 1
+# At this point, Y is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 6 - 8 == character 11) -> 1
+#       if (character 6 - 8 != character 11) -> 26
+#     if (character 7 != character 8) ->
+#       if (character 8 + 4 == character 11) -> 1
+#       if (character 8 + 4 != character 11) -> 26
+#   if (character 9 + 7 != character 10) ->
+#     if (character 10 + 5 == character 11) -> 1
+#     if (character 10 + 5 != character 11) -> 26
+
+mul z y
+mul y 0
+add y w
+add y 10
+mul y x
+add z y
+
+# At this point, Z is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 6 - 8 == character 11) ->                          26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 6 - 8 != character 11) -> 26 * (                   26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5                                                      ) + character 11 + 10
+#       if (character 4 - 6 != character 5) ->
+#         if (character 6 - 8 == character 11) ->                    26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#         if (character 6 - 8 != character 11) -> 26 * (             26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7                                   ) + character 11 + 10
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 8 + 4 == character 11) ->              26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#         if (character 8 + 4 != character 11) -> 26 * (       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6                    ) + character 11 + 10
+#       if (character 4 - 6 != character 5) ->
+#         if (character 8 + 4 == character 11) ->              26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#         if (character 8 + 4 != character 11) -> 26 * (       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6                    ) + character 11 + 10
+#   if (character 9 + 7 != character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->             26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (      26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6                    ) + character 11 + 10
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->             26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (      26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6                    ) + character 11 + 10
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12) + character 11 + 10
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12) + character 11 + 10
+
+inp w # read character 12
+
+mul x 0
+add x z
+mod x 26
+div z 26
+# At this point, X is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 6 - 8 == character 11) ->
+#         if (character 4 - 6 == character 5) -> character 3 + 5
+#         if (character 4 - 6 != character 5) -> character 5 + 7
+#       if (character 6 - 8 != character 11) -> character 11 + 10
+#     if (character 7 != character 8) ->
+#       if (character 8 + 4 == character 11) -> character 6
+#       if (character 8 + 4 != character 11) -> character 11 + 10
+#   if (character 9 + 7 != character 10) ->
+#     if (character 10 + 5 == character 11) ->
+#       if (character 7 == character 8) -> character 6
+#       if (character 7 != character 8) -> character 8 + 12
+#     if (character 10 + 5 != character 11) -> character 11 + 10
+
+# At this point, Z is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 6 - 8 == character 11) ->                          26 * (character 1 + 6) + character 2 + 12
+#         if (character 6 - 8 != character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#       if (character 4 - 6 != character 5) ->
+#         if (character 6 - 8 == character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 6 - 8 != character 11) ->              26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 8 + 4 == character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 8 + 4 != character 11) ->        26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->
+#         if (character 8 + 4 == character 11) ->              26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#         if (character 8 + 4 != character 11) ->        26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#   if (character 9 + 7 != character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->                   26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 10 + 5 != character 11) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->             26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#         if (character 10 + 5 != character 11) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+
+add x -4
+eql x w
+eql x 0
+# At this point, X is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 6 - 8 == character 11) ->
+#         if (character 4 - 6 == character 5) ->
+#           if (character 3 + 1 == character 12) -> 0
+#           if (character 3 + 1 != character 12) -> 1
+#         if (character 4 - 6 != character 5) ->
+#           if (character 5 + 3 == character 12) -> 0
+#           if (character 5 + 3 != character 12) -> 1
+#       if (character 6 - 8 != character 11) ->
+#         if (character 11 + 6 == character 12) -> 0
+#         if (character 11 + 6 != character 12) -> 1
+#     if (character 7 != character 8) ->
+#       if (character 8 + 4 == character 11) ->
+#         if (character 6 - 4 == character 12) -> 0
+#         if (character 6 - 4 != character 12) -> 1
+#       if (character 8 + 4 != character 11) ->
+#         if (character 11 + 6 == character 12) -> 0
+#         if (character 11 + 6 != character 12) -> 1
+#   if (character 9 + 7 != character 10) ->
+#     if (character 10 + 5 == character 11) ->
+#       if (character 7 == character 8) ->
+#         if (character 6 - 4 == character 12) -> 0
+#         if (character 6 - 4 != character 12) -> 1
+#       if (character 7 != character 8) ->
+#         if (character 8 + 8 == character 12) -> 0
+#         if (character 8 + 8 != character 12) -> 1
+#     if (character 10 + 5 != character 11) ->
+#       if (character 11 + 6 == character 12) -> 0
+#       if (character 11 + 6 != character 12) -> 1
+
+mul y 0
+add y 25
+mul y x
+add y 1
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 6 - 8 == character 11) ->
+#         if (character 4 - 6 == character 5) ->
+#           if (character 3 + 1 == character 12) -> 1
+#           if (character 3 + 1 != character 12) -> 26
+#         if (character 4 - 6 != character 5) ->
+#           if (character 5 + 3 == character 12) -> 1
+#           if (character 5 + 3 != character 12) -> 26
+#       if (character 6 - 8 != character 11) ->
+#         if (character 11 + 6 == character 12) -> 1
+#         if (character 11 + 6 != character 12) -> 26
+#     if (character 7 != character 8) ->
+#       if (character 8 + 4 == character 11) ->
+#         if (character 6 - 4 == character 12) -> 1
+#         if (character 6 - 4 != character 12) -> 26
+#       if (character 8 + 4 != character 11) ->
+#         if (character 11 + 6 == character 12) -> 1
+#         if (character 11 + 6 != character 12) -> 26
+#   if (character 9 + 7 != character 10) ->
+#     if (character 10 + 5 == character 11) ->
+#       if (character 7 == character 8) ->
+#         if (character 6 - 4 == character 12) -> 1
+#         if (character 6 - 4 != character 12) -> 26
+#       if (character 7 != character 8) ->
+#         if (character 8 + 8 == character 12) -> 1
+#         if (character 8 + 8 != character 12) -> 26
+#     if (character 10 + 5 != character 11) ->
+#       if (character 11 + 6 == character 12) -> 1
+#       if (character 11 + 6 != character 12) -> 26
+
+mul z y
+mul y 0
+add y w
+add y 11
+mul y x
+add z y
+
+# At this point, Z is one of
+#   if (character 9 + 7 == character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 6 - 8 == character 11) ->                          26 * (character 1 + 6) + character 2 + 12
+#         if (character 6 - 8 != character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#       if (character 4 - 6 != character 5) ->
+#         if (character 6 - 8 == character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 6 - 8 != character 11) ->              26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 8 + 4 == character 11) ->                    26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 8 + 4 != character 11) ->        26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->
+#         if (character 8 + 4 == character 11) ->              26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#         if (character 8 + 4 != character 11) ->        26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#   if (character 9 + 7 != character 10) ->
+#     if (character 7 == character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->                   26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5
+#         if (character 10 + 5 != character 11) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->             26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7
+#         if (character 10 + 5 != character 11) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#     if (character 7 != character 8) ->
+#       if (character 4 - 6 == character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (      26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5)                    + character 6) + character 8 + 12
+#       if (character 4 - 6 != character 5) ->
+#         if (character 10 + 5 == character 11) ->       26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6
+#         if (character 10 + 5 != character 11) -> 26 * (26 * (26 * (26 * (26 * (character 1 + 6) + character 2 + 12) + character 3 + 5) + character 5 + 7) + character 6) + character 8 + 12
+
+
+inp w # read character 13
+
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -15
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y 9
+mul y x
+add z y
+
+inp w # read character 14
+
+mul x 0
+add x z
+mod x 26
+div z 26
+add x -8
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+
+mul y 0
+add y w
+add y 9
+mul y x
+add z y
+
+# Z has to be 0
